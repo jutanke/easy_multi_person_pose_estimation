@@ -3,8 +3,7 @@ import numpy as np
 import urllib.request
 import shutil
 from keras.models import load_model
-from os import makedirs, listdir
-from os.path import join, isfile, isdir, exists, splitext
+from os.path import join, isfile
 
 
 def padRightDownCorner(img, stride, padValue):
@@ -76,7 +75,6 @@ class PoseEstimator:
 
         multiplier = [x * boxsize / h for x in scale_search]
 
-        #All_heatmaps = []; All_pafs = []
         nbr_scales = len(scale_search)
         heatmaps_over_scales = np.zeros((n, nbr_scales, h, w, 19))
         pafs_over_scales = np.zeros((n, nbr_scales, h, w, 38))
