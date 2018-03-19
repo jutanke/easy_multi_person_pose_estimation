@@ -369,7 +369,7 @@ class PoseEstimator:
             nbr_persons = len(subset)
             cur_positions = []
             for _ in range(nbr_persons):
-                cur_positions.append([None] * 18)
+                cur_positions.append([(-1, -1)] * 18)
 
             for j in range(17):
                 for k in range(nbr_persons):
