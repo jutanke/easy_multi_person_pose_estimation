@@ -216,11 +216,11 @@ class PoseEstimator:
 
         POSITIONS = []
 
-        for i in range(n):
+        for cur_frame in range(n):
             all_peaks = []
             peak_counter = 0
             for part in range(19-1):
-                hm = heatmaps[i][:,:,part]
+                hm = heatmaps[cur_frame][:,:,part]
                 blur = gaussian_filter(hm, sigma=3)  #TODO use cv2 here..
 
                 map_left = np.zeros(blur.shape)
@@ -249,7 +249,7 @@ class PoseEstimator:
 
             # -----------------------
             mid_num = 10
-            paf_avg = np.squeeze(pafs)
+            paf_avg = np.squeeze(pafs[cur_frame])
             thre2 = 0.05
             special_k = []
             connection_all = []
@@ -359,7 +359,7 @@ class PoseEstimator:
                             subset = np.vstack([subset, row])
 
             # delete some rows of subset which has few parts occur
-            deleteIdx = [];
+            deleteIdx = []
             for i in range(len(subset)):
                 if subset[i][-1] < 4 or subset[i][-2] / subset[i][-1] < 0.4:
                     deleteIdx.append(i)
