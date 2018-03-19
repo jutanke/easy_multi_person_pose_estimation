@@ -4,6 +4,7 @@ import urllib.request
 import shutil
 from keras.models import load_model
 from os.path import join, isfile
+from scipy.ndimage.filters import gaussian_filter
 
 
 def padRightDownCorner(img, stride, padValue):
@@ -44,11 +45,13 @@ class PoseEstimator:
                  boxsize=368,
                  padValue=128,
                  stride=8,
-                 scale_search=[0.5, 1, 1.5, 2]):
+                 scale_search=[0.5, 1, 1.5, 2],
+                 peak_threshold=0.1):
         self.boxsize = boxsize
         self.padValue = padValue
         self.stride = stride
         self.scale_search = scale_search
+        self.peak_threshold = peak_threshold
 
         modelf = join(model_dir, 'poseestimation.h5')
         if not isfile(modelf):
@@ -59,6 +62,56 @@ class PoseEstimator:
         self.model = load_model(modelf)
 
     def predict(self, X):
+        """
+        end-to-end prediction
+        :param X:
+        :return:
+        """
+        if len(X.shape) == 3:  # single image: make it big
+            X = np.expand_dims(X, 0)
+        n = X.shape[0]
+        thre1 = self.peak_threshold
+
+        # get the heatmaps and pafs for all scales for each
+        # entry in X
+        heatmaps, pafs = self.predict_pafs_and_heatmaps(X)
+
+        all_peaks = []
+        peak_counter = 0
+
+        for i in range(n):
+            for part in range(19-1):
+                hm = heatmaps[i][:,:,part]
+                blur = gaussian_filter(hm, sigma=3)  #TODO use cv2 here..
+
+                map_left = np.zeros(blur.shape)
+                map_left[1:, :] = blur[:-1, :]
+                map_right = np.zeros(blur.shape)
+                map_right[:-1, :] = blur[1:, :]
+                map_up = np.zeros(blur.shape)
+                map_up[:, 1:] = blur[:, :-1]
+                map_down = np.zeros(blur.shape)
+                map_down[:, :-1] = blur[:, 1:]
+
+                peaks_binary = np.logical_and.reduce(
+                    (blur >= map_left, blur >= map_right,
+                     blur >= map_up, blur >= map_down, blur > thre1))
+
+                peaks = list(
+                    zip(np.nonzero(peaks_binary)[1],
+                        np.nonzero(peaks_binary)[0]))
+
+                peaks_with_score = [x + (hm[x[1], x[0]],) for x in peaks]
+                id = range(peak_counter, peak_counter + len(peaks))
+                peaks_with_score_and_id = [peaks_with_score[i] + (id[i],) for i in range(len(id))]
+
+                all_peaks.append(peaks_with_score_and_id)
+                peak_counter += len(peaks)
+
+        return all_peaks
+
+
+    def predict_pafs_and_heatmaps(self, X):
         """
 
         :param X:
@@ -108,4 +161,5 @@ class PoseEstimator:
                 pafs_over_scales[i,j] = paf
 
 
-        return heatmaps_over_scales, pafs_over_scales
+        return np.mean(heatmaps_over_scales, axis=1), \
+               np.mean(pafs_over_scales, axis=1)
