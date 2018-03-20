@@ -266,7 +266,6 @@ class PoseEstimator:
                 score_mid = paf_avg[:, :, [x - 19 for x in mapIdx[k]]]
                 candA = all_peaks[limbSeq[k][0] - 1]
                 candB = all_peaks[limbSeq[k][1] - 1]
-                #indexA, indexB = limbSeq[k]
                 nA = len(candA)
                 nB = len(candB)
                 if nA != 0 and nB != 0:
@@ -381,8 +380,9 @@ class PoseEstimator:
                     a, b = np.array(limbSeq[j]) - 1
                     _Y = candidate[index.astype(int), 0]
                     _X = candidate[index.astype(int), 1]
-                    cur_positions[k][a] = (_X[0], _Y[0])
-                    cur_positions[k][b] = (_X[1], _Y[1])
+                    _Score = candidate[index.astype(int), 2]
+                    cur_positions[k][a] = (_X[0], _Y[0], _Score[0])
+                    cur_positions[k][b] = (_X[1], _Y[1], _Score[1])
 
             POSITIONS.append(np.array(cur_positions))
 
