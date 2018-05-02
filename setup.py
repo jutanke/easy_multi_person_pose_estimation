@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(
-    name="pak",
-    version="0.0.1",
+    name="poseestimation",
+    version="0.0.2",
     packages=[  "poseestimation"],
 )
