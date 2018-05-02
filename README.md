@@ -1,5 +1,5 @@
 # Easy Multi-Person Pose Estimation
-My ugly oop'ification from [Zhe Cao's](https://github.com/ZheC/Realtime_Multi-Person_Pose_Estimation) code using the model from [Michal Faber](https://github.com/michalfaber/keras_Realtime_Multi-Person_Pose_Estimation). 
+OOP'ification from [Zhe Cao's](https://github.com/ZheC/Realtime_Multi-Person_Pose_Estimation) code using the model from [Michal Faber](https://github.com/michalfaber/keras_Realtime_Multi-Person_Pose_Estimation). 
 Please respect the initial authors licenses.
 Install as follows:
 
